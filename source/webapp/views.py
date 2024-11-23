@@ -1,20 +1,28 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from webapp.cat import Cat
 
-cat = {
-    'name': None,
-    'age': 1,
-    'satiety': 40,
-    'happiness': 40,
-}
+
 
 def index(request):
-    if cat['name']:
-        print(cat)
+    if Cat.name:
+        return HttpResponseRedirect('/cat_stats/')
 
     if request.method == "GET":
         return render(request, 'index.html')
     elif request.method == "POST":
         name = request.POST.get('name')
         if name:
-            cat['name'] = name
-        return render(request, 'index.html')
+            Cat.name = name
+            return HttpResponseRedirect('/cat_stats/')
+        return HttpResponseRedirect('/')
+
+def cat_stats(request):
+    if not Cat.name:
+        return HttpResponseRedirect('/')
+    if request.method == "POST":
+        action = request.POST.get('action')
+        Cat.action(action)
+        return HttpResponseRedirect('/cat_stats/')
+
+    return render(request, 'cat_stats.html', {'cat': Cat})
